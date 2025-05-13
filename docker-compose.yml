@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  proxy:
+    image: serjs/go-3proxy
+    container_name: proxy
+    volumes:
+      - ./config/3proxy.cfg:/etc/3proxy/3proxy.cfg
+    ports:
+      - "3000-3010:3000-3010"
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+    restart: always
+
+  api:
+    build: ./backend
+    container_name: proxy-ui-api
+    volumes:
+      - ./config:/app/config
+      - ./backend/data:/app/data
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+    restart: always
+
+  frontend:
+    build: ./frontend
+    container_name: proxy-ui-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:4000
+    depends_on:
+      - api
+    restart: always
